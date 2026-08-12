@@ -1,0 +1,38 @@
+server:
+  # 腾讯云 CVM 的 SSH 连接信息
+  host: 127.0.0.1
+  port: 22
+  user: root
+  password_file: D:/AIWorkspace/04Products/99secure/rns/tencent-prod.password
+  host_key_sha256: "SHA256:replace-with-verified-fingerprint"
+release:
+  # 服务器上的固定发布目录与 Compose 配置
+  remote_root: /mnt/foundation
+  compose_source: /docker-compose.yml
+  compose_file: /mnt/rns/rns-server/docker-compose.prod.yml
+  env_file: /opt/rns/.env.production
+  compose_project: rns
+  retain_releases: 3
+backend:
+  # 后端构建产物、远程目录及健康检查
+  artifact: service/admin/target/admin.jar
+  remote_dir: backend
+  container_service: backend
+  health_url: http://127.0.0.1:8080/actuator/health
+frontends:
+  admin:
+    # 管理端前端
+    dist_dir: ui/admin-ui/dist
+    remote_dir: admin-ui
+    container_service: admin-web
+    health_url: https://admin.example.com/
+  customer:
+    # 用户端前端
+    dist_dir: ui/customer-ui/dist
+    remote_dir: customer-ui
+    container_service: customer-web
+    health_url: https://www.example.com/
+verification:
+  # 发布后的轮询健康检查参数
+  timeout_seconds: 120
+  retry_interval_seconds: 5

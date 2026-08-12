@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.foundation.service.mapper.BsnDemoMapper">
+    
+    <resultMap type="BsnDemo" id="BsnDemoResult">
+        <result property="id"    column="id"    />
+        <result property="tinyintCol"    column="tinyint_col"    />
+        <result property="smallintCol"    column="smallint_col"    />
+        <result property="mediumintCol"    column="mediumint_col"    />
+        <result property="intCol"    column="int_col"    />
+        <result property="bigintCol"    column="bigint_col"    />
+        <result property="tinyintUnsignedCol"    column="tinyint_unsigned_col"    />
+        <result property="smallintUnsignedCol"    column="smallint_unsigned_col"    />
+        <result property="intUnsignedCol"    column="int_unsigned_col"    />
+        <result property="bigintUnsignedCol"    column="bigint_unsigned_col"    />
+        <result property="floatCol"    column="float_col"    />
+        <result property="doubleCol"    column="double_col"    />
+        <result property="decimalCol"    column="decimal_col"    />
+        <result property="bitCol"    column="bit_col"    />
+        <result property="booleanCol"    column="boolean_col"    />
+        <result property="charCol"    column="char_col"    />
+        <result property="varcharCol"    column="varchar_col"    />
+        <result property="tinytextCol"    column="tinytext_col"    />
+        <result property="textCol"    column="text_col"    />
+        <result property="mediumtextCol"    column="mediumtext_col"    />
+        <result property="longtextCol"    column="longtext_col"    />
+        <result property="binaryCol"    column="binary_col"    />
+        <result property="varbinaryCol"    column="varbinary_col"    />
+        <result property="tinyblobCol"    column="tinyblob_col"    />
+        <result property="blobCol"    column="blob_col"    />
+        <result property="mediumblobCol"    column="mediumblob_col"    />
+        <result property="longblobCol"    column="longblob_col"    />
+        <result property="enumCol"    column="enum_col"    />
+        <result property="setCol"    column="set_col"    />
+        <result property="dateCol"    column="date_col"    />
+        <result property="timeCol"    column="time_col"    />
+        <result property="yearCol"    column="year_col"    />
+        <result property="datetimeCol"    column="datetime_col"    />
+        <result property="timestampCol"    column="timestamp_col"    />
+        <result property="jsonCol"    column="json_col"    />
+    </resultMap>
+
+    <sql id="selectBsnDemoVo">
+        select id, tinyint_col, smallint_col, mediumint_col, int_col, bigint_col, tinyint_unsigned_col, smallint_unsigned_col, int_unsigned_col, bigint_unsigned_col, float_col, double_col, decimal_col, bit_col, boolean_col, char_col, varchar_col, tinytext_col, text_col, mediumtext_col, longtext_col, binary_col, varbinary_col, tinyblob_col, blob_col, mediumblob_col, longblob_col, enum_col, set_col, date_col, time_col, year_col, datetime_col, timestamp_col, json_col from bsn_demo
+    </sql>
+
+    <select id="selectBsnDemoList" parameterType="BsnDemo" resultMap="BsnDemoResult">
+        <include refid="selectBsnDemoVo"/>
+        <where>  
+            <if test="tinyintCol != null "> and tinyint_col = #{tinyintCol}</if>
+            <if test="smallintCol != null "> and smallint_col = #{smallintCol}</if>
+            <if test="mediumintCol != null "> and mediumint_col = #{mediumintCol}</if>
+            <if test="intCol != null "> and int_col = #{intCol}</if>
+            <if test="bigintCol != null "> and bigint_col = #{bigintCol}</if>
+            <if test="tinyintUnsignedCol != null  and tinyintUnsignedCol != ''"> and tinyint_unsigned_col = #{tinyintUnsignedCol}</if>
+            <if test="smallintUnsignedCol != null  and smallintUnsignedCol != ''"> and smallint_unsigned_col = #{smallintUnsignedCol}</if>
+            <if test="intUnsignedCol != null  and intUnsignedCol != ''"> and int_unsigned_col = #{intUnsignedCol}</if>
+            <if test="bigintUnsignedCol != null  and bigintUnsignedCol != ''"> and bigint_unsigned_col = #{bigintUnsignedCol}</if>
+            <if test="floatCol != null "> and float_col = #{floatCol}</if>
+            <if test="doubleCol != null "> and double_col = #{doubleCol}</if>
+            <if test="decimalCol != null "> and decimal_col = #{decimalCol}</if>
+            <if test="bitCol != null "> and bit_col = #{bitCol}</if>
+            <if test="booleanCol != null "> and boolean_col = #{booleanCol}</if>
+            <if test="charCol != null  and charCol != ''"> and char_col = #{charCol}</if>
+            <if test="varcharCol != null  and varcharCol != ''"> and varchar_col = #{varcharCol}</if>
+            <if test="tinytextCol != null  and tinytextCol != ''"> and tinytext_col = #{tinytextCol}</if>
+            <if test="textCol != null  and textCol != ''"> and text_col = #{textCol}</if>
+            <if test="mediumtextCol != null  and mediumtextCol != ''"> and mediumtext_col = #{mediumtextCol}</if>
+            <if test="longtextCol != null  and longtextCol != ''"> and longtext_col = #{longtextCol}</if>
+            <if test="binaryCol != null  and binaryCol != ''"> and binary_col = #{binaryCol}</if>
+            <if test="varbinaryCol != null  and varbinaryCol != ''"> and varbinary_col = #{varbinaryCol}</if>
+            <if test="tinyblobCol != null  and tinyblobCol != ''"> and tinyblob_col = #{tinyblobCol}</if>
+            <if test="blobCol != null  and blobCol != ''"> and blob_col = #{blobCol}</if>
+            <if test="mediumblobCol != null  and mediumblobCol != ''"> and mediumblob_col = #{mediumblobCol}</if>
+            <if test="longblobCol != null  and longblobCol != ''"> and longblob_col = #{longblobCol}</if>
+            <if test="enumCol != null  and enumCol != ''"> and enum_col = #{enumCol}</if>
+            <if test="setCol != null  and setCol != ''"> and set_col = #{setCol}</if>
+            <if test="dateCol != null "> and date_col = #{dateCol}</if>
+            <if test="timeCol != null "> and time_col = #{timeCol}</if>
+            <if test="yearCol != null  and yearCol != ''"> and year_col = #{yearCol}</if>
+            <if test="datetimeCol != null "> and datetime_col = #{datetimeCol}</if>
+            <if test="timestampCol != null "> and timestamp_col = #{timestampCol}</if>
+            <if test="jsonCol != null  and jsonCol != ''"> and json_col = #{jsonCol}</if>
+        </where>
+    </select>
+    
+    <select id="selectBsnDemoById" parameterType="Long" resultMap="BsnDemoResult">
+        <include refid="selectBsnDemoVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertBsnDemo" parameterType="BsnDemo" useGeneratedKeys="true" keyProperty="id">
+        insert into bsn_demo
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="tinyintCol != null">tinyint_col,</if>
+            <if test="smallintCol != null">smallint_col,</if>
+            <if test="mediumintCol != null">mediumint_col,</if>
+            <if test="intCol != null">int_col,</if>
+            <if test="bigintCol != null">bigint_col,</if>
+            <if test="tinyintUnsignedCol != null">tinyint_unsigned_col,</if>
+            <if test="smallintUnsignedCol != null">smallint_unsigned_col,</if>
+            <if test="intUnsignedCol != null">int_unsigned_col,</if>
+            <if test="bigintUnsignedCol != null">bigint_unsigned_col,</if>
+            <if test="floatCol != null">float_col,</if>
+            <if test="doubleCol != null">double_col,</if>
+            <if test="decimalCol != null">decimal_col,</if>
+            <if test="bitCol != null">bit_col,</if>
+            <if test="booleanCol != null">boolean_col,</if>
+            <if test="charCol != null">char_col,</if>
+            <if test="varcharCol != null">varchar_col,</if>
+            <if test="tinytextCol != null">tinytext_col,</if>
+            <if test="textCol != null">text_col,</if>
+            <if test="mediumtextCol != null">mediumtext_col,</if>
+            <if test="longtextCol != null">longtext_col,</if>
+            <if test="binaryCol != null">binary_col,</if>
+            <if test="varbinaryCol != null">varbinary_col,</if>
+            <if test="tinyblobCol != null">tinyblob_col,</if>
+            <if test="blobCol != null">blob_col,</if>
+            <if test="mediumblobCol != null">mediumblob_col,</if>
+            <if test="longblobCol != null">longblob_col,</if>
+            <if test="enumCol != null">enum_col,</if>
+            <if test="setCol != null">set_col,</if>
+            <if test="dateCol != null">date_col,</if>
+            <if test="timeCol != null">time_col,</if>
+            <if test="yearCol != null">year_col,</if>
+            <if test="datetimeCol != null">datetime_col,</if>
+            <if test="timestampCol != null">timestamp_col,</if>
+            <if test="jsonCol != null">json_col,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="tinyintCol != null">#{tinyintCol},</if>
+            <if test="smallintCol != null">#{smallintCol},</if>
+            <if test="mediumintCol != null">#{mediumintCol},</if>
+            <if test="intCol != null">#{intCol},</if>
+            <if test="bigintCol != null">#{bigintCol},</if>
+            <if test="tinyintUnsignedCol != null">#{tinyintUnsignedCol},</if>
+            <if test="smallintUnsignedCol != null">#{smallintUnsignedCol},</if>
+            <if test="intUnsignedCol != null">#{intUnsignedCol},</if>
+            <if test="bigintUnsignedCol != null">#{bigintUnsignedCol},</if>
+            <if test="floatCol != null">#{floatCol},</if>
+            <if test="doubleCol != null">#{doubleCol},</if>
+            <if test="decimalCol != null">#{decimalCol},</if>
+            <if test="bitCol != null">#{bitCol},</if>
+            <if test="booleanCol != null">#{booleanCol},</if>
+            <if test="charCol != null">#{charCol},</if>
+            <if test="varcharCol != null">#{varcharCol},</if>
+            <if test="tinytextCol != null">#{tinytextCol},</if>
+            <if test="textCol != null">#{textCol},</if>
+            <if test="mediumtextCol != null">#{mediumtextCol},</if>
+            <if test="longtextCol != null">#{longtextCol},</if>
+            <if test="binaryCol != null">#{binaryCol},</if>
+            <if test="varbinaryCol != null">#{varbinaryCol},</if>
+            <if test="tinyblobCol != null">#{tinyblobCol},</if>
+            <if test="blobCol != null">#{blobCol},</if>
+            <if test="mediumblobCol != null">#{mediumblobCol},</if>
+            <if test="longblobCol != null">#{longblobCol},</if>
+            <if test="enumCol != null">#{enumCol},</if>
+            <if test="setCol != null">#{setCol},</if>
+            <if test="dateCol != null">#{dateCol},</if>
+            <if test="timeCol != null">#{timeCol},</if>
+            <if test="yearCol != null">#{yearCol},</if>
+            <if test="datetimeCol != null">#{datetimeCol},</if>
+            <if test="timestampCol != null">#{timestampCol},</if>
+            <if test="jsonCol != null">#{jsonCol},</if>
+         </trim>
+    </insert>
+
+    <update id="updateBsnDemo" parameterType="BsnDemo">
+        update bsn_demo
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="tinyintCol != null">tinyint_col = #{tinyintCol},</if>
+            <if test="smallintCol != null">smallint_col = #{smallintCol},</if>
+            <if test="mediumintCol != null">mediumint_col = #{mediumintCol},</if>
+            <if test="intCol != null">int_col = #{intCol},</if>
+            <if test="bigintCol != null">bigint_col = #{bigintCol},</if>
+            <if test="tinyintUnsignedCol != null">tinyint_unsigned_col = #{tinyintUnsignedCol},</if>
+            <if test="smallintUnsignedCol != null">smallint_unsigned_col = #{smallintUnsignedCol},</if>
+            <if test="intUnsignedCol != null">int_unsigned_col = #{intUnsignedCol},</if>
+            <if test="bigintUnsignedCol != null">bigint_unsigned_col = #{bigintUnsignedCol},</if>
+            <if test="floatCol != null">float_col = #{floatCol},</if>
+            <if test="doubleCol != null">double_col = #{doubleCol},</if>
+            <if test="decimalCol != null">decimal_col = #{decimalCol},</if>
+            <if test="bitCol != null">bit_col = #{bitCol},</if>
+            <if test="booleanCol != null">boolean_col = #{booleanCol},</if>
+            <if test="charCol != null">char_col = #{charCol},</if>
+            <if test="varcharCol != null">varchar_col = #{varcharCol},</if>
+            <if test="tinytextCol != null">tinytext_col = #{tinytextCol},</if>
+            <if test="textCol != null">text_col = #{textCol},</if>
+            <if test="mediumtextCol != null">mediumtext_col = #{mediumtextCol},</if>
+            <if test="longtextCol != null">longtext_col = #{longtextCol},</if>
+            <if test="binaryCol != null">binary_col = #{binaryCol},</if>
+            <if test="varbinaryCol != null">varbinary_col = #{varbinaryCol},</if>
+            <if test="tinyblobCol != null">tinyblob_col = #{tinyblobCol},</if>
+            <if test="blobCol != null">blob_col = #{blobCol},</if>
+            <if test="mediumblobCol != null">mediumblob_col = #{mediumblobCol},</if>
+            <if test="longblobCol != null">longblob_col = #{longblobCol},</if>
+            <if test="enumCol != null">enum_col = #{enumCol},</if>
+            <if test="setCol != null">set_col = #{setCol},</if>
+            <if test="dateCol != null">date_col = #{dateCol},</if>
+            <if test="timeCol != null">time_col = #{timeCol},</if>
+            <if test="yearCol != null">year_col = #{yearCol},</if>
+            <if test="datetimeCol != null">datetime_col = #{datetimeCol},</if>
+            <if test="timestampCol != null">timestamp_col = #{timestampCol},</if>
+            <if test="jsonCol != null">json_col = #{jsonCol},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteBsnDemoById" parameterType="Long">
+        delete from bsn_demo where id = #{id}
+    </delete>
+
+    <delete id="deleteBsnDemoByIds" parameterType="String">
+        delete from bsn_demo where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,64 @@
+一、最终可用 systemd 配置文件
+
+vim /etc/systemd/system/mxips.service
+
+[Unit]
+Description=mxips ipsomc service
+After=network.target
+
+[Service]
+User=root
+Group=root
+# 重点：不要 nohup、不要末尾&
+ExecStart=/mnt/mxips/ipsomc
+
+# 看门狗核心配置
+Restart=on-failure
+RestartSec=1
+
+# 防止无限崩溃循环
+StartLimitInterval=60
+StartLimitBurst=5
+
+Type=simple
+# 标准输出、错误输出交给journalctl
+StandardOutput=journal
+StandardError=journal
+
+# 可选：指定工作目录（程序读取相对路径文件时非常重要）
+WorkingDirectory=/mnt/mxips
+
+[Install]
+WantedBy=multi-user.target
+
+
+二、执行部署命令
+
+# 1. 先把你之前手动nohup启动的旧进程杀掉！
+pkill ipsomc
+
+# 2. 重载systemd配置
+systemctl daemon-reload
+
+# 3. 设置开机自启
+systemctl enable mxips
+
+# 4. 启动服务
+systemctl start mxips
+
+# 查看状态（直接看到Main PID）
+systemctl status mxips
+
+三、日常操作
+
+# 查看进程PID
+systemctl show -p MainPID --value mxips
+
+# 实时日志
+journalctl -u mxips -f
+
+# 停止
+systemctl stop mxips
+
+# 重启
+systemctl restart mxips

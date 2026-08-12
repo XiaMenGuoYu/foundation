@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+java $JAVA_OPTS -server \
+	-XX:+UseContainerSupport \
+	-XX:MaxRAMPercentage=75.0 \
+	-XX:InitialRAMPercentage=50.0 \
+	-XX:+UseG1GC \
+	-XX:MaxGCPauseMillis=200 \
+	-XX:G1HeapRegionSize=16m \
+	-XX:+UseStringDeduplication \
+	-XX:+UnlockExperimentalVMOptions \
+	-XX:+UseCompressedOops \
+	-XX:+OptimizeStringConcat \
+	-Djava.security.egd=file:/dev/./urandom \
+	-Dspring.datasource.druid.slave.enabled=false \
+	-Dspring.datasource.druid.master.url=jdbc:mysql://10.194.108.195:3306/mall?allowMultiQueries=true \
+	-Dspring.datasource.druid.master.username=test_zhsc \
+	-Dspring.datasource.druid.master.password='7NaU#JKb7X8^Y&PW'\-Dspring.data.redis.host=10.194.108.194 \
+	-Dspring.data.redis.port=6379 \
+	-Dspring.data.redis.password='fWsJtn3sa!KVR=VH'\
+	-Dspring.rabbitmq.host=10.194.107.189 \
+	-Dspring.rabbitmq.port=5672\
+	-Dspring.rabbitmq.admin=admin \
+	-Dspring.rabbitmq.password=bdxk1234 \
+	-Dspring.rabbitmq.virtual-host=zhsc \
+	-Dminio.endpoint=http://127.0.0.1:9000 \
+	-Dminio.publicUrl=https://vmall.jfsytest.com/minio/\
+	-Dminio.accessKey=UwxGwMxk6odFCDwXANHn \
+	-Dminio.secretKey=uLMv9RyLpirpkbQKYBypwtzsIZS42D8hUNN9SCsw N
+	-jar app.jar

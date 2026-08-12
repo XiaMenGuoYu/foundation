@@ -1,0 +1,124 @@
+https://m00pit38gju.feishu.cn/wiki/FAn6wPERNijOowkbUHKcdYcgnne?from=space_search
+
+1. 背景
+免费证书，一般时间较短，可以使用ACME工具（以acme.sh为例）来实现SSL证书申请和自动续期。
+1.1 ACME
+ACME（Automatic Certificate Management Environment）协议是由 Let’s Encrypt 推出的自动化 SSL 证书管理协议。通过 ACME 协议，网站管理员可以轻松地自动申请、更新和管理 SSL 证书，完全告别手动操作的烦恼。
+2. 具体操作
+https://github.com/acmesh-official/acme.sh/wiki/%E8%AF%B4%E6%98%8E
+2.1 安装方式
+[root@ecs-196866 mnt]# curl https://get.acme.sh | sh -s email=dev@fjbdxk.com
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  1032    0  1032    0     0     94      0 --:--:--  0:00:10 --:--:--   152
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  229k  100  229k    0     0   205k      0  0:00:01  0:00:01 --:--:--  205k
+[Wed Jan 28 15:05:16 CST 2026] Installing from online archive.
+[Wed Jan 28 15:05:16 CST 2026] Downloading https://github.com/acmesh-official/acme.sh/archive/master.tar.gz
+[Wed Jan 28 15:05:18 CST 2026] Extracting master.tar.gz
+[Wed Jan 28 15:05:18 CST 2026] Installing to /root/.acme.sh
+[Wed Jan 28 15:05:18 CST 2026] Installed to /root/.acme.sh/acme.sh
+[Wed Jan 28 15:05:18 CST 2026] Installing alias to '/root/.bashrc'
+[Wed Jan 28 15:05:18 CST 2026] Close and reopen your terminal to start using acme.sh
+[Wed Jan 28 15:05:18 CST 2026] Installing alias to '/root/.cshrc'
+[Wed Jan 28 15:05:18 CST 2026] Installing alias to '/root/.tcshrc'
+[Wed Jan 28 15:05:18 CST 2026] Installing cron job
+no crontab for root
+no crontab for root
+[Wed Jan 28 15:05:18 CST 2026] bash has been found. Changing the shebang to use bash as preferred.
+[Wed Jan 28 15:05:19 CST 2026] OK
+[Wed Jan 28 15:05:19 CST 2026] Install success!
+
+[root@ecs-196866 home]# alias acme.sh=/root/.acme.sh/acme.sh
+
+2.2 更改默认证书
+[root@ecs-196866 home]# acme.sh --set-default-ca  --server  letsencrypt
+[Wed Jan 28 15:30:24 CST 2026] Changed default CA to: https://acme-v02.api.letsencrypt.org/directory
+
+2.3 自动添加DNS解析
+2.3.1 华为云
+https://console.huaweicloud.com/iam5/?locale=zh-cn&agencyId=9135b24b7baa4b40900ba0f2df7e3795&region=cn-north-4#/users
+[图片]
+export HUAWEICLOUD_Username="ca_user"
+export HUAWEICLOUD_Password="Fjbdxk@Ca@123456"
+export HUAWEICLOUD_DomainName="fjbdxk"
+
+2.4 获取证书添加DNS记录
+[root@ecs-196866 home]# acme.sh --issue --dns dns_huaweicloud -d ai.fjbdxk.com -d mxips.fjbdxk.com -d dify.fjbdxk.com
+[Wed Jan 28 16:58:22 CST 2026] Using CA: https://acme-v02.api.letsencrypt.org/directory
+[Wed Jan 28 16:58:22 CST 2026] Single domain='ai.fjbdxk.com'
+[Wed Jan 28 16:58:41 CST 2026] Getting webroot for domain='ai.fjbdxk.com'
+[Wed Jan 28 16:58:42 CST 2026] ai.fjbdxk.com is already verified, skipping dns-01.
+[Wed Jan 28 16:58:42 CST 2026] Verification finished, beginning signing.
+[Wed Jan 28 16:58:42 CST 2026] Let's finalize the order.
+[Wed Jan 28 16:58:42 CST 2026] Le_OrderFinalize='https://acme-v02.api.letsencrypt.org/acme/finalize/3006324546/474299082026'
+[Wed Jan 28 16:59:24 CST 2026] Downloading cert.
+[Wed Jan 28 16:59:24 CST 2026] Le_LinkCert='https://acme-v02.api.letsencrypt.org/acme/cert/05e624bf75267c0574094d085213442cc14e'
+[Wed Jan 28 16:59:29 CST 2026] Cert success.
+-----BEGIN CERTIFICATE-----
+MIIDjjCCAxWgAwIBAgISBeYkv3UmfAV0CU0IUhNELMFOMAoGCCqGSM49BAMDMDIx
+CzAJBgNVBAYTAlVTMRYwFAYDVQQKEw1MZXQncyBFbmNyeXB0MQswCQYDVQQDEwJF
+NzAeFw0yNjAxMjgwODAwNTFaFw0yNjA0MjgwODAwNTBaMBgxFjAUBgNVBAMTDWFp
+LmZqYmR4ay5jb20wWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAATyPzNWYh1Oy5mG
+jFxtg9dLdqQaJF9J0cG41WegkfC87+DfP9L6V1JZv2jZxqmCeDjvxnoOIJlzfasP
+y1SuzPIgo4ICIzCCAh8wDgYDVR0PAQH/BAQDAgeAMB0GA1UdJQQWMBQGCCsGAQUF
+BwMBBggrBgEFBQcDAjAMBgNVHRMBAf8EAjAAMB0GA1UdDgQWBBT6fITfyrcxajkz
+yc88VDFZwCYUSDAfBgNVHSMEGDAWgBSuSJ7chx1EoG/aouVgdAR4wpwAgDAyBggr
+BgEFBQcBAQQmMCQwIgYIKwYBBQUHMAKGFmh0dHA6Ly9lNy5pLmxlbmNyLm9yZy8w
+GAYDVR0RBBEwD4INYWkuZmpiZHhrLmNvbTATBgNVHSAEDDAKMAgGBmeBDAECATAt
+BgNVHR8EJjAkMCKgIKAehhxodHRwOi8vZTcuYy5sZW5jci5vcmcvNzkuY3JsMIIB
+DAYKKwYBBAHWeQIEAgSB/QSB+gD4AH4Apcl4kl1XRheChw3YiWYLXFVki30AQPLs
+B2hR0YhpGfcAAAGcA9QpZgAIAAAFADBUjIQEAwBHMEUCIHDzs41AMDkJF6f47tqk
+cn2BTlxQBEzd27O3yB/Qe73BAiEA9vHOWuZuEwceU2ulzYR6b0IZfrz/+eIKrFXs
+ykzWwmcAdgAOV5S8866pPjMbLJkHs/eQ35vCPXEyJd0hqSWsYcVOIQAAAZwD1DCf
+AAAEAwBHMEUCIQDVrasMVxkaff2/YqUu7Fv9F5lKqJiORWjlfu7HuMlzKAIgbQ3U
+OWUXEK+tSKCDpOvZqnS9d4w53bcIlmYraW5ZjH8wCgYIKoZIzj0EAwMDZwAwZAIw
+Kt085w1NlSBFRoAZ6XGkXV5igPV1Lt9vFZrshUSuDJCVQlc7IwPRpxHthzpgTmqU
+AjB+jftW6ty2/Opxvu44gP3HyvID8M3zj+TorN1mThR884QbShiVMXpqrC+j5OZF
+LTA=
+-----END CERTIFICATE-----
+[Wed Jan 28 16:59:29 CST 2026] Your cert is in: /root/.acme.sh/ai.fjbdxk.com_ecc/ai.fjbdxk.com.cer
+[Wed Jan 28 16:59:29 CST 2026] Your cert key is in: /root/.acme.sh/ai.fjbdxk.com_ecc/ai.fjbdxk.com.key
+[Wed Jan 28 16:59:29 CST 2026] The intermediate CA cert is in: /root/.acme.sh/ai.fjbdxk.com_ecc/ca.cer
+[Wed Jan 28 16:59:29 CST 2026] And the full-chain cert is in: /root/.acme.sh/ai.fjbdxk.com_ecc/fullchain.cer
+
+
+2.5 拷贝证书
+[root@ecs-196866 home]# acme.sh --install-cert -d ai.fjbdxk.com --key-file /etc/nginx/cert/ai.fjbdxk.key --fullchain-file /etc/nginx/cert/ai.fjbdxk.crt --reloadcmd     "service nginx reload"
+[Wed Jan 28 17:04:46 CST 2026] The domain 'ai.fjbdxk.com' seems to already have an ECC cert, let's use it.
+[Wed Jan 28 17:04:46 CST 2026] Installing key to: /etc/nginx/cert/ai.fjbdxk.key
+[Wed Jan 28 17:04:46 CST 2026] Installing full chain to: /etc/nginx/cert/ai.fjbdxk.pem
+[Wed Jan 28 17:04:46 CST 2026] Running reload cmd: service nginx reload
+Redirecting to /bin/systemctl reload nginx.service
+[Wed Jan 28 17:04:46 CST 2026] Reload successful
+
+
+2.6 查看安装
+[root@ecs-196866 home]# acme.sh --info -d dify.fjbdxk.com
+[Wed Jan 28 17:25:21 CST 2026] The domain 'dify.fjbdxk.com' seems to already have an ECC cert, let's use it.
+DOMAIN_CONF=/root/.acme.sh/dify.fjbdxk.com_ecc/dify.fjbdxk.com.conf
+Le_Domain=dify.fjbdxk.com
+Le_Alt=no
+Le_Webroot=dns_huaweicloud
+Le_PreHook=
+Le_PostHook=
+Le_RenewHook=
+Le_API=https://acme-v02.api.letsencrypt.org/directory
+Le_Keylength=ec-256
+Le_OrderFinalize=https://acme-v02.api.letsencrypt.org/acme/finalize/3006324546/474305631086
+Le_LinkOrder=https://acme-v02.api.letsencrypt.org/acme/order/3006324546/474305631086
+Le_LinkCert=https://acme-v02.api.letsencrypt.org/acme/cert/06e0261ad56f2a56e7ae6af2c947ec9a8a60
+Le_CertCreateTime=1769592182
+Le_CertCreateTimeStr=2026-01-28T09:23:02Z
+Le_NextRenewTimeStr=2026-02-26T09:23:02Z
+Le_NextRenewTime=1772097782
+Le_RealCertPath=
+Le_RealCACertPath=
+Le_RealKeyPath=/etc/nginx/cert/dify.fjbdxk.key
+Le_ReloadCmd=service nginx reload
+Le_RealFullChainPath=/etc/nginx/cert/dify.fjbdxk.crt
+
+2.7 打开自动更新（可选）
+acme.sh --upgrade --auto-upgrade
+

@@ -1,0 +1,28 @@
+services:
+  mysql:
+    image: mysql:8.0.40
+    container_name: mysql
+    restart: always
+    mem_limit: 1300m
+    memswap_limit: 1300m
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: 123456
+    volumes:
+      - /mnt/docker-data/mysql:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    command:
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --innodb_buffer_pool_size=768M
+      --max_connections=150
+      --default-authentication-plugin=caching_sha2_password
+
+
+# 参数说明
+# 内存参数专为你的 2C4G 服务器配置
+# innodb_buffer_pool_size=768M，混布 Java 服务必须限制，避免 OOM
+# default-authentication-plugin=caching_sha2_password
+# MySQL8 默认加密方式，适配 JDK17 SpringBoot 连接驱动，避免登录报错
+# TZ: Asia/Shanghai 解决数据库时间相差 8 小时问题

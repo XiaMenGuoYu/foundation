@@ -1,0 +1,4 @@
+interface:
+  display_name: "腾讯云部署"
+  short_description: "固定脚本部署后端与双前端应用"
+  default_prompt: "使用 $tencent-cloud-deploy 部署已配置的腾讯云目标环境。"

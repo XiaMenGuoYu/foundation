@@ -1,0 +1,11 @@
+services:
+  foundation-server:
+    ports:
+      - 8080:8080
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: 'found-server'
+    image: found-server
+    environment:
+      - TZ=Asia/Shanghai

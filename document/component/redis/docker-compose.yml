@@ -1,0 +1,18 @@
+services:
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    restart: always
+    mem_limit: 512m
+    memswap_limit: 768m
+    ports:
+      - "6379:6379"
+    volumes:
+      - /mnt/docker-data/redis:/data
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 384mb
+      --maxmemory-policy allkeys-lru
+    environment:
+      - TZ=Asia/Shanghai

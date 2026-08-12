@@ -1,0 +1,23 @@
+.DS_Store
+node_modules/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+**/*.log
+
+tests/**/coverage/
+tests/e2e/reports
+selenium-debug.log
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.local
+
+# npm 锁文件需提交以保证依赖一致（覆盖根 .gitignore 的忽略规则，仅本目录生效）
+!package-lock.json

@@ -1,0 +1,50 @@
+# Project-local execution policy. Loaded only when the repository's .codex
+# configuration layer is trusted.
+
+prefix_rule(
+    pattern = ["git", "push"],
+    decision = "prompt",
+    justification = "Pushing changes affects the shared remote repository.",
+    match = ["git push", "git push origin codex/example"],
+)
+
+prefix_rule(
+    pattern = ["npm", "publish"],
+    decision = "prompt",
+    justification = "Publishing a package is an external release action.",
+    match = ["npm publish", "npm publish --access public"],
+)
+
+prefix_rule(
+    pattern = ["mvn", "deploy"],
+    decision = "prompt",
+    justification = "Deploying Maven artifacts changes an external repository.",
+    match = ["mvn deploy", "mvn deploy -DskipTests"],
+)
+
+prefix_rule(
+    pattern = ["docker", "compose", ["up", "down", "restart", "rm"]],
+    decision = "prompt",
+    justification = "Changing Docker Compose lifecycle may affect shared infrastructure.",
+    match = [
+        "docker compose up -d",
+        "docker compose down",
+        "docker compose restart",
+        "docker compose rm",
+    ],
+    not_match = ["docker compose ps", "docker compose logs"],
+)
+
+# OpenSpec manages versioned change artifacts within this repository.
+prefix_rule(
+    pattern = ["openspec"],
+    decision = "allow",
+    justification = "OpenSpec commands are approved for project-local specification management.",
+    match = [
+        "openspec list --json",
+        "openspec status <change-id> --json",
+        "openspec validate <change-id> --strict",
+        "openspec new change <change-id>",
+        "openspec archive <change-id>",
+    ],
+)

@@ -1,0 +1,17 @@
+services:
+  backend:
+    image: eclipse-temurin:17-jre
+    restart: unless-stopped
+    command: ["java", "-jar", "/app/admin.jar"]
+    volumes:
+      - /opt/rns/current/backend:/app:ro
+  admin-web:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    volumes:
+      - /opt/rns/current/admin-ui:/usr/share/nginx/html:ro
+  customer-web:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    volumes:
+      - /opt/rns/current/customer-ui:/usr/share/nginx/html:ro

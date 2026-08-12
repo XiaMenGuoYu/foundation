@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="renderer" content="webkit">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <link rel="icon" href="/favicon.ico">
+  <title>%VITE_APP_TITLE%</title>
+  <style>
+    html,
+    body,
+    #app {
+      height: 100%;
+      margin: 0px;
+      padding: 0px;
+    }
+
+    #loader-wrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 999999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #f5f7fa;
+    }
+
+    #loader {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 3px solid #dcdfe6;
+      border-top-color: #409eff;
+      animation: spin 1s linear infinite;
+    }
+
+    #loader-wrapper .load_title {
+      margin-top: 16px;
+      color: #606266;
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #loader {
+        animation: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div id="loader-wrapper">
+      <div id="loader"></div>
+      <div class="load_title">正在加载，请稍候</div>
+    </div>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
