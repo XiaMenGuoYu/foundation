@@ -129,10 +129,12 @@ spring:
       testWhileIdle: true
       testOnBorrow: false
       testOnReturn: false
+      # web统计过滤器
       webStatFilter: 
-        enabled: true
+        enabled: false
+      # druid统计视图
       statViewServlet:
-        enabled: true
+        enabled: false
         # 设置白名单，不填则允许所有访问
         allow:
         url-pattern: /druid/*
@@ -185,9 +187,10 @@ pagehelper:
 # Springdoc配置
 springdoc:
   api-docs:
+    enabled: false
     path: /v3/api-docs
   swagger-ui:
-    enabled: true
+    enabled: false
     path: /swagger-ui.html
     tags-sorter: alpha
   group-configs:
