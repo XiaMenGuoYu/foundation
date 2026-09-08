@@ -70,3 +70,11 @@
 - 使用 2 空格、K&R 大括号和 `private final` 构造器注入；Controller 使用 `@Anonymous`、`@Validated`、`@RestController` 与 `@RequestMapping`，方法使用 `@RequestBody` 接收 Request 并直接返回 Response。
 - 公开 API 的 Request、Response 使用独立类型，可使用 `@Data` 消除样板代码；不得以持久化实体作为公开 API 的入参或出参。
 - Controller 端点方法必须注释其用途、关键请求约束和稳定错误语义；Request/Response 的字段或 record 组件在业务含义、单位、枚举范围或可空性不显然时必须注释；仅在项目隔离、状态过滤、脱敏投影和可选区域降级等核心逻辑处补充解释性注释。
+
+## 8. 管理端菜单与权限
+
+- 业务权限统一使用 `business:<resource>:<action>`，其中 `<resource>` 使用与前端 API 模块一致的 `lowerCamelCase` 资源名，`<action>` 使用 `list`、`query`、`add`、`edit`、`remove`、`export` 等明确动作。
+- 管理页面菜单使用 `list` 权限；查询、新增、修改、删除和导出分别使用对应按钮权限。独立管理入口必须拥有独立资源名和权限集合，不得借用相邻业务权限。
+- Controller 的 `@PreAuthorize`、前端的 `v-hasPermi`、API 模块和 `sys_menu.perms` 必须逐项一致。前端隐藏按钮只改善交互，Service 仍需执行项目隔离和业务权限防御。
+- 菜单路由使用小写 kebab-case；组件路径、API 目录和页面目录围绕同一资源命名，避免一个资源出现多套缩写。
+- `sys_menu` 初始化与回滚 SQL 使用 [database-code-style.md](database-code-style.md) 的通用模板，不在业务规则文件中复制具体菜单 SQL。

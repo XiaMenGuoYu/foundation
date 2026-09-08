@@ -1,38 +1,39 @@
-# 后端规则
+# 后端业务协作规则
 
-本文件适用于 `service/`，并继承仓库根 `AGENTS.md`。
+本文件适用于 `service/`，并继承仓库根 `AGENTS.md`。Java、Spring、API、日志和 SQL 的技术写法以 `document/development/` 对应规范为准；本文件只描述后端业务边界和仓库内复用要求。
 
 ## 模块职责
 
-- `admin`：Spring Boot 启动、配置绑定、Controller、Web 安全、统一异常响应，以及公开 API 的编排 Service。
-- `business`：领域对象、DTO、Service、业务权限、MyBatis Mapper 和缓存失效。
-- `integration`：第三方平台等外部系统边界。
-- 依赖只能沿 `admin -> business -> integration`；integration 不得引用 business，business 不得引用 admin。
+- `admin` 承载启动配置、Controller、Web 安全、统一异常响应，以及面向 customer-ui 等外部调用方的编排 Service。
+- `business` 承载领域对象、领域 DTO、Service、业务权限、Mapper 和缓存失效；不得新增仅为外部调用方做转发或投影的重复编排 Service。
+- `integration` 承载第三方平台适配器，不反向依赖业务模块。
+- 依赖方向固定为 `admin -> business -> integration`；business 不得依赖 admin，integration 不得依赖 business。
 
-## Java 风格
+## 项目隔离与业务权限
 
-- 新增代码先按接口类型选择 `document/development/backend-code-style.md` 的模板：管理端 CRUD 使用管理端 CRUD 模板，公开 API 使用公开 API 模板；模板规则优先于本节的通用约定。
-- 管理端 CRUD 使用 4 空格、Allman 大括号、`@Autowired` 字段注入和 `I...Service` 约定；公开 API 使用 2 空格、K&R 大括号与 `private final` 构造器注入。
-- 目标 Java 标准见 `document/development/code-style.md` 与 `document/development/backend-code-style.md`；涉及 SQL 时还须读取 `database-code-style.md`。当前 `spotless:apply` 仍使用 AOSP profile；禁止为迁移模板而全量格式化存量文件。
-- 禁止通配符 import、原始类型和无约束反射；能用明确 DTO、record、enum 时不使用动态 Map。
-- 业务异常使用项目统一异常类型和简体中文安全提示；日志使用参数占位符，不拼接敏感内容。
-- 对外 Service、复杂安全边界和非显然降级策略写简短 Javadoc；不要给显然的 getter/setter 添加噪声注释。
+- Controller 只做协议适配和入口鉴权；Service 必须再次校验超级管理员或项目角色，不依赖前端隐藏按钮。
+- 所有项目级查询和写入必须显式携带并校验 `projectId` 或服务端解析的项目上下文，不得信任前端传入的归属关系。
+- 读取、修改和删除项目资源时，查询条件必须同时包含资源主键与项目上下文，禁止先按主键读取后再补做归属判断。
+- 管理端列表、详情和写操作使用领域 Service；公开 API 的项目解析、状态过滤、排序、分页、安全投影和响应组装位于 admin 编排 Service，并直接复用领域 Service。
+- 公开 API 只返回安全 Response，不暴露 Domain、密文、大字段或内部异常；可选增强故障可以安全降级，核心写入失败不得伪装成功。
 
-## Web 与权限
+## 通用后端能力复用
 
-- Controller 按选定模板保持薄层：管理端 CRUD 使用 `@PreAuthorize` 校验入口权限、写操作使用 `@Log`；公开 API 使用 `@Anonymous`、`@Validated` 和 Request/Response 契约。存在 Bean Validation 约束时，在对应请求参数上使用 `@Valid`。
-- Service 必须再次校验超级管理员或项目角色，不依赖 Controller 和前端隐藏按钮。
-- 读取、更新和删除项目资源时，查询条件必须同时包含资源 ID 与项目 ID，禁止“先按 ID 读取、后信任请求项目”的越权窗口。
-- 公开 API 只返回安全 Response；不要把 Domain、密文列或内部异常堆栈直接序列化。管理端 CRUD 使用领域对象作为控制器入参与返回数据。
-- 可选能力故障应记录无敏感信息的告警并安全降级；核心写入失败不得伪装成功。
+- 周期、延迟或可配置调度统一复用 RuoYi 系统定时任务，调用目标使用 `<beanName>.<methodName>`；Cron、启停、并发和错过执行策略由系统任务配置管理。
+- 业务模块不得使用 `@Scheduled`、`@EnableScheduling` 或硬编码调度表达式另建调度链路。任务 Bean 只调用已有领域 Service，不复制领域规则。
+- 需要随版本初始化任务时，通过版本化 SQL 注册调用目标并提供人工回滚说明；不得在应用启动代码中重复创建任务。
 
-## MyBatis 与 SQL
+## 管理端菜单与权限
 
-- Mapper 接口位于业务领域包，XML 位于 `service/business/src/main/resources/mapper/<domain>/`。
-- 列表查询使用明确列清单；大字段、密文和脚本仅允许在确需的受控查询中读取。
-- 动态条件使用参数绑定，禁止 `${}` 拼接用户输入。
-- 变更后检查 XML 可解析、SQL 无物理外键、索引顺序与主要查询前缀一致。
-- 写操作需要事务时在 Service 标注 `@Transactional`，并在成功提交的语义下推进缓存版本。
+- 新增独立管理入口时必须同步 Controller 权限、admin-ui 权限、`sys_menu` 菜单和按钮初始化及人工回滚。
+- 权限命名、`@PreAuthorize` 契约和管理端 CRUD 模板以 `document/development/backend-code-style.md` 为准。
+- `sys_menu` 的幂等初始化和回滚 SQL 模板以 `document/development/database-code-style.md` 为准；不得修改 `platform/sql/` 或自动扩大普通角色权限。
+
+## 规范入口
+
+- 任意后端代码先阅读 `document/development/code-style.md` 和 `document/development/backend-code-style.md`。
+- 涉及表结构、迁移或 Mapper SQL 时，同时阅读 `document/development/database-code-style.md`。
+- 管理端 CRUD 与公开 API 必须分别使用后端规范中的正式模板，不得以存量代码偏差反向降低标准。
 
 ## 验证
 
@@ -41,4 +42,4 @@ mvn.cmd -f service/pom.xml spotless:check
 mvn.cmd -f service/pom.xml "-Dmaven.test.skip=true" package
 ```
 
-除非用户在当前任务明确授权，禁止运行 `mvn test`、Surefire/Failsafe 测试目标或任何测试类。
+Spotless 不可用时必须说明原因并执行可用的编译或生产打包门禁。未经用户在当前任务明确授权，不得运行 Maven test、Surefire/Failsafe 测试目标或任何测试类。
