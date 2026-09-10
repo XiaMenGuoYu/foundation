@@ -1,0 +1,25 @@
+name: lite
+version: 1
+description: 小型需求精简流程：proposal → specs → tasks
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    description: 说明小型变更的背景、内容、能力和影响范围
+    template: proposal.md
+    requires: []
+  - id: specs
+    generates: specs/**/*.md
+    description: 使用需求与场景定义可验收行为
+    template: specs/spec.md
+    requires:
+      - proposal
+  - id: tasks
+    generates: tasks.md
+    description: 提供精简且可验证的实施清单
+    template: tasks.md
+    requires:
+      - specs
+apply:
+  requires:
+    - tasks
+  tracks: tasks.md
