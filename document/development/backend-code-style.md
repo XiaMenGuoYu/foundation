@@ -28,6 +28,15 @@
 - 管理端 CRUD 的 Controller 与 Service 使用 `@Autowired` 字段注入；公开 API 的 Controller 与编排 Service 使用 `private final` 构造器注入。Spring 单例 Bean 不得保存请求级可变状态；循环依赖是设计缺陷。
 - 事务标注在 Service 的公开用例边界；只读查询应使用只读事务语义（框架支持时）。
 
+### 3.1 Integration 类型与配置边界
+
+`service/integration` 中的适配器必须按连接目标和配置生命周期分为以下两类；新增适配器时必须先明确所属类型，不得混用两类配置方式。
+
+- **组件**：指随应用部署、由应用统一配置并直接提供稳定能力的基础组件，例如 MinIO。组件必须在自身包内提供类型明确的 `Config`，通过 `@ConfigurationProperties` 绑定配置并按需创建客户端 Bean；组件 Service 通过依赖注入使用配置和客户端。调用方只传业务参数并直接调用 Service，不得重复传递服务地址、凭据、超时等组件配置，也不得自行创建组件客户端。
+- **第三方系统**：指服务地址、凭据或超时可能随项目、租户、业务记录或运行环境变化的外部系统，例如 `remote`。第三方系统的适配 Service 必须保持无请求级状态，不得把某一个目标系统的连接信息固化为全局 `Config` 或写入单例 Bean 字段；调用方必须在每次调用时显式提供 `ServerInfo`，业务参数与 `ServerInfo` 分开传递。
+- `ServerInfo` 由调用方根据当前业务上下文解析和组装，集中承载服务地址、认证信息与超时。Integration 适配器必须在发起请求前校验所需字段，并使用其中的连接参数；不得自行读取业务模块配置、查询业务数据或反向依赖 `business`、`admin`。
+- 选择类型时以配置生命周期为准：连接信息由应用统一管理且调用期间固定时使用组件模式；连接信息可能因调用上下文变化时使用第三方系统模式。不得通过可选 `ServerInfo`、隐式默认目标或两套重载同时支持两种模式。
+
 ## 4. API、校验与类型
 
 - 外部输入必须在边界校验：Bean Validation 表达结构约束，Service 表达需要查询或跨聚合判断的业务约束。公开 API 在类上使用 `@Validated`；存在 Bean Validation 约束时，在请求参数上使用 `@Valid`。
@@ -47,6 +56,27 @@
 - 使用 SLF4J 参数化日志，禁止字符串拼接。日志记录足够的“何时、何处、谁、做什么”上下文，但只记录排障所需的最小数据。
 - 禁止记录密码、验证码、token、session ID、Cookie、Authorization 头、连接串、密钥和完整个人敏感信息。来自外部的日志字段必须防范 CR/LF 等日志注入。
 - `ERROR` 表示需要处理的失败，`WARN` 表示异常但可恢复状态，`INFO` 表示重要业务状态变化，`DEBUG` 用于开发排障。同一异常只由能补充上下文或最终处理的层记录。
+
+### 5.1 第三方系统 HTTP 调用
+
+- Integration 模块请求第三方系统时，POST 请求必须使用 Hutool 的 `HttpUtil.createPost(url)` 创建 `HttpRequest`，并通过 `serverInfo.getTimeout()` 设置连接超时；不得在调用点自行创建 HTTP 客户端或硬编码超时时间。
+- 请求体写入后必须记录请求上下文，执行请求后必须先调用 `checkResponse` 校验响应，再记录成功日志。接口名称使用能识别外部能力的业务名称，`sourceId` 等关联标识按实际上下文替换。
+- 请求 URL、请求体和响应体仅可记录经脱敏、截断及 CR/LF 清理后的值；不得因本节示例而记录完整 URL、凭据或个人敏感信息。
+
+```java
+HttpRequest request = HttpUtil.createPost(url)
+    .setConnectionTimeout(serverInfo.getTimeout());
+request.body(body.toString());
+log.info("接口名称: url-{}, body-{}", sanitizeUrl(url), redactAndTruncate(body.toString()));
+
+HttpResponse response = request.execute();
+checkResponse("接口名称", response);
+
+log.info(
+    "接口请求成功: sourceId-{}, response-{}",
+    todo.getSourceId(),
+    redactAndTruncate(response.body()));
+```
 
 ## 6. 当前格式化约束
 
