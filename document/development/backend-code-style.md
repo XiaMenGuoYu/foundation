@@ -28,14 +28,27 @@
 - 管理端 CRUD 的 Controller 与 Service 使用 `@Autowired` 字段注入；公开 API 的 Controller 与编排 Service 使用 `private final` 构造器注入。Spring 单例 Bean 不得保存请求级可变状态；循环依赖是设计缺陷。
 - 事务标注在 Service 的公开用例边界；只读查询应使用只读事务语义（框架支持时）。
 
-### 3.1 Integration 类型与配置边界
+### 3.1 组件与第三方系统
 
-`service/integration` 中的适配器必须按连接目标和配置生命周期分为以下两类；新增适配器时必须先明确所属类型，不得混用两类配置方式。
+`service/integration` 同时承载基础组件和第三方系统适配，两者的配置来源、生命周期和调用方式不同，不得混用模板。新增能力前必须先判断属于以下哪一类，并在 OpenSpec design 中说明分类依据。
 
-- **组件**：指随应用部署、由应用统一配置并直接提供稳定能力的基础组件，例如 MinIO。组件必须在自身包内提供类型明确的 `Config`，通过 `@ConfigurationProperties` 绑定配置并按需创建客户端 Bean；组件 Service 通过依赖注入使用配置和客户端。调用方只传业务参数并直接调用 Service，不得重复传递服务地址、凭据、超时等组件配置，也不得自行创建组件客户端。
-- **第三方系统**：指服务地址、凭据或超时可能随项目、租户、业务记录或运行环境变化的外部系统，例如 `remote`。第三方系统的适配 Service 必须保持无请求级状态，不得把某一个目标系统的连接信息固化为全局 `Config` 或写入单例 Bean 字段；调用方必须在每次调用时显式提供 `ServerInfo`，业务参数与 `ServerInfo` 分开传递。
-- `ServerInfo` 由调用方根据当前业务上下文解析和组装，集中承载服务地址、认证信息与超时。Integration 适配器必须在发起请求前校验所需字段，并使用其中的连接参数；不得自行读取业务模块配置、查询业务数据或反向依赖 `business`、`admin`。
-- 选择类型时以配置生命周期为准：连接信息由应用统一管理且调用期间固定时使用组件模式；连接信息可能因调用上下文变化时使用第三方系统模式。不得通过可选 `ServerInfo`、隐式默认目标或两套重载同时支持两种模式。
+#### 3.1.1 组件
+
+- 组件是由本系统统一配置和管理生命周期的基础设施能力，例如 `minio`。组件可以使用 `@ConfigurationProperties` 读取应用配置，由 `@Configuration` 创建 SDK 客户端 Bean，并通过 `@Service` 封装文件、消息或存储等稳定能力。
+- 组件配置必须引用环境变量或安全配置源，不得写入真实凭据。SDK 客户端应由 Spring 单例复用并在需要时正确释放，不得在每次方法调用时重新创建。
+- 组件公开方法只暴露本系统需要的业务无关能力，不得泄漏第三方 SDK 的内部类型、连接对象或凭据。
+
+#### 3.1.2 第三方系统
+
+- 第三方系统是由调用方在运行时选择连接目标并调用其业务接口的平台，例如 `remote`。适配代码位于 `service/integration/src/main/java/.../integration/<platform>/`，入口类型命名为 `<Platform>Service` 并使用 `@Component`，请求与响应 DTO 位于相邻的 `dto/` 包。
+- 每个公开方法只映射一个第三方接口，第一个参数统一为 `ServerInfo`，服务地址、应用标识、应用密钥和超时从该参数获取。调用方需要传递的 Token、资源 ID 和查询条件必须作为显式参数，不得隐藏在进程级可变状态中，也不得为该平台另建应用配置项。
+- 默认不得为简单接口增加 `Client`、`Provider`、`internal` HTTP 层、Token 缓存、自动刷新或自动重试。只有已批准的 OpenSpec 明确要求这些能力，且存在独立生命周期、并发或复用约束时才允许增加对应结构。
+- GET 请求使用 Hutool `HttpUtil.createGet(url)`，POST 请求使用 `HttpUtil.createPost(url)` 创建 `HttpRequest`，并通过 `serverInfo.getTimeout()` 设置连接超时；不得在调用点自行创建其他 HTTP 客户端或硬编码超时时间。表单请求使用 `form`，JSON 请求使用 `body`，Content-Type 必须与第三方契约一致。
+- 执行请求后必须先检查 `response.isOk()`，再使用 `JSONUtil` 解析响应并检查第三方业务成功码，最后把业务数据映射为明确 DTO。校验可在方法内完成；只有多个接口存在完全相同的响应契约时才提取公共校验方法，不得依赖仓库中不存在的 `checkResponse`。
+- 第三方文档已明确为动态对象的字段可以使用 `JSONObject`、`JSONArray` 或带边界的集合承载；其余请求和响应不得使用原始集合或无边界 `Map` 掩盖已知契约。
+- 第三方失败默认抛出保留原始 cause 的运行时异常，由上层业务决定是否转换；异常消息只保留安全、可读的状态信息，不得直接透传完整响应体、完整 URL、凭据、Token 或个人敏感信息。
+- 日志只记录平台名、接口名、资源标识、HTTP 状态和业务码等最小上下文。外部文本写日志前必须清理 CR/LF 并限制长度；禁止记录 `appSecret`、`client_secret`、访问令牌、鉴权表单、完整 URL、完整请求体或完整响应体。
+- 第三方系统适配器使用 4 空格块缩进和 K&R 大括号。`remote` 模块仅作为包结构、依赖传入和 Hutool 调用方式的参考；其中未使用 import、重复注释、完整报文日志和直接透传响应体等存量偏差不得复制到新代码。
 
 ## 4. API、校验与类型
 
@@ -56,27 +69,6 @@
 - 使用 SLF4J 参数化日志，禁止字符串拼接。日志记录足够的“何时、何处、谁、做什么”上下文，但只记录排障所需的最小数据。
 - 禁止记录密码、验证码、token、session ID、Cookie、Authorization 头、连接串、密钥和完整个人敏感信息。来自外部的日志字段必须防范 CR/LF 等日志注入。
 - `ERROR` 表示需要处理的失败，`WARN` 表示异常但可恢复状态，`INFO` 表示重要业务状态变化，`DEBUG` 用于开发排障。同一异常只由能补充上下文或最终处理的层记录。
-
-### 5.1 第三方系统 HTTP 调用
-
-- Integration 模块请求第三方系统时，POST 请求必须使用 Hutool 的 `HttpUtil.createPost(url)` 创建 `HttpRequest`，并通过 `serverInfo.getTimeout()` 设置连接超时；不得在调用点自行创建 HTTP 客户端或硬编码超时时间。
-- 请求体写入后必须记录请求上下文，执行请求后必须先调用 `checkResponse` 校验响应，再记录成功日志。接口名称使用能识别外部能力的业务名称，`sourceId` 等关联标识按实际上下文替换。
-- 请求 URL、请求体和响应体仅可记录经脱敏、截断及 CR/LF 清理后的值；不得因本节示例而记录完整 URL、凭据或个人敏感信息。
-
-```java
-HttpRequest request = HttpUtil.createPost(url)
-    .setConnectionTimeout(serverInfo.getTimeout());
-request.body(body.toString());
-log.info("接口名称: url-{}, body-{}", sanitizeUrl(url), redactAndTruncate(body.toString()));
-
-HttpResponse response = request.execute();
-checkResponse("接口名称", response);
-
-log.info(
-    "接口请求成功: sourceId-{}, response-{}",
-    todo.getSourceId(),
-    redactAndTruncate(response.body()));
-```
 
 ## 6. 当前格式化约束
 
